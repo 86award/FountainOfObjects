@@ -15,26 +15,25 @@ public class GameManager
 
         while (gameActive)
         {
+            string? enteredText;
+
             Console.WriteLine();
             DisplayPlayerLocString(player);
-            // would be better to take the room description here and colour-code text for player options
-            // get room co-ords and then description based on player location
             DisplayRoomDescription(player, map);
 
-            string? playerAction;
             do
             {
                 // it would be nice if the room that the player was in determined valid moves - add later
-                Console.Write("Please enter a valid command e.g., ");
+                Console.Write("Please enter a valid action e.g., ");
                 WriteColourText("move north/south/east/west", ConsoleColor.Yellow);
                 Console.Write(": ");
-                playerAction = Console.ReadLine();
-                // check for legal move here
-            } while (playerAction == null);
+                enteredText = Console.ReadLine().ToLower().Trim();
+            } while (enteredText == null);
 
             // this is quite limited an feels like a good place to use a generic so various actions can be handled
-            // in fact, I should make a generic Action that can take a move, enable, search etc.
-            MoveDirection newLocation = playerAction switch
+            // in fact, I should make a generic Action that can take a move, enable, search, attack etc.
+
+            MoveDirection newLocation = enteredText switch
             {
                 "move north" => new MoveDirection(-1, 0),
                 "move south" => new MoveDirection(1, 0),

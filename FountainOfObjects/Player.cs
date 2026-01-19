@@ -27,9 +27,3 @@ public class Player
         return new PlayerLocation(Row, Column);
     }
 }
-
-public struct PlayerLocation(int row, int column)
-{
-    public int Row { get; } = row;
-    public int Column { get; } = column;
-}
