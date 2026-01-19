@@ -1,27 +1,56 @@
 // Make this class static because there's only ever going to be one
+public enum MapSizes
+{
+    Small,
+    Medium,
+    Large,
+}
+
 public class MapManager
 {
     public int RowQty { get; private set; }
     public int ColQty { get; private set; }
     public Room[,] Rooms { get; private set; }
+    public MapSizes MapSize { get; private set; }
 
-    public MapManager(int row, int column)
+    // I think this is the factory pattern - using a static to effectively call a constructor?
+    public static MapManager CreateMap(MapSizes mapSize)
+    {
+        switch (mapSize)
+        {
+            case MapSizes.Large:
+                return new MapManager(8, 8, MapSizes.Large);
+            case MapSizes.Medium:
+                return new MapManager(6, 6, MapSizes.Medium);
+            case MapSizes.Small: // fallthrough into default
+            default:
+                return new MapManager(4, 4, MapSizes.Small);
+        }
+    }
+
+    public MapManager(int row, int column, MapSizes mapSizes)
     {
         RowQty = row;
         ColQty = column;
+        MapSize = mapSizes;
         Rooms = new Room[RowQty, ColQty];
-        PopulateMapWithRooms();
+        PopulateMapWithRooms(MapSize);
     }
 
     // need a way to setting the entrance and fountain locs
-    private void PopulateMapWithRooms()
+    private void PopulateMapWithRooms(MapSizes mapSizes)
     {
         for (int i = 0; i < Rooms.GetLength(1); i++) // columns
         {
             for (int j = 0; j < Rooms.GetLength(0); j++) // rows
             {
                 if (i == 0 && j == 0) Rooms[i, j] = new RoomEntrance();
-                else if (i == 0 && j == 2) Rooms[i, j] = new RoomFountain(); // this is hard-coded atm so needs refactoring
+                
+                // Here I can have a nest switch that puts the fountain in a pre-determined cell based on map size
+                else if (mapSizes == MapSizes.Small && i == 0 && j == 2) Rooms[i, j] = new RoomFountain(); // this is hard-coded atm so needs refactoring
+                else if (mapSizes == MapSizes.Medium && i == 3 && j == 4) Rooms[i, j] = new RoomFountain(); // not overly happy with how this works
+                else if (mapSizes == MapSizes.Large && i == 6 && j == 5) Rooms[i, j] = new RoomFountain(); 
+
                 else Rooms[i, j] = new Room(); // will populate L-R then next row
             }
         }

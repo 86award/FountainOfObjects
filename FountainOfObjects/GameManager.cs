@@ -8,8 +8,29 @@ public class GameManager
 
     public void InitialiseGame()
     {
-        MapManager map = new MapManager(4, 4);
+        MapManager? map = null;
+        
+        bool mapSizeSet = false;
+        
+        do
+        {
+            Console.Write($"Please choose a map size to determine the level of difficulty (small, medium, large): ");
+            string mapSize = Console.ReadLine() ?? "small".ToLower().Trim();
+            // I want to use an enum to force the map size from a limited range
+            if (Enum.TryParse<MapSizes>(mapSize, true, out MapSizes result))
+            {
+                map = MapManager.CreateMap(result);
+                mapSizeSet = true;
+            }
+            else
+            {
+                Console.WriteLine("Invalid map size.");
+            }
+        } while (mapSizeSet == false);
+
         Player player = new Player(0, 0);
+
+        Console.WriteLine();
         Console.WriteLine("---------------------------------------------------------------------------");
         Console.WriteLine("| You find yourself at the mouth of a dark cave system. You take a deep   |");
         Console.WriteLine("| breath and enter.                                                       |");
