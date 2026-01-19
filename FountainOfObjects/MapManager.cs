@@ -38,22 +38,33 @@ public class MapManager
     }
 
     // need a way to setting the entrance and fountain locs
-    private void PopulateMapWithRooms(MapSizes mapSizes)
+    private void PopulateMapWithRooms(MapSizes mapSize)
     {
+        (int row, int column) fountainLocation = GetFountainLocationForMap(mapSize);
+
         for (int i = 0; i < Rooms.GetLength(1); i++) // columns
         {
             for (int j = 0; j < Rooms.GetLength(0); j++) // rows
             {
                 if (i == 0 && j == 0) Rooms[i, j] = new RoomEntrance();
-                
+
                 // Here I can have a nest switch that puts the fountain in a pre-determined cell based on map size
-                else if (mapSizes == MapSizes.Small && i == 0 && j == 2) Rooms[i, j] = new RoomFountain(); // this is hard-coded atm so needs refactoring
-                else if (mapSizes == MapSizes.Medium && i == 3 && j == 4) Rooms[i, j] = new RoomFountain(); // not overly happy with how this works
-                else if (mapSizes == MapSizes.Large && i == 6 && j == 5) Rooms[i, j] = new RoomFountain(); 
+                else if (i == fountainLocation.row && j == fountainLocation.column) Rooms[i, j] = new RoomFountain(); // this is hard-coded atm so needs refactoring
+                // not overly happy with how this works
 
                 else Rooms[i, j] = new Room(); // will populate L-R then next row
             }
         }
+    }
+
+    private (int row, int column) GetFountainLocationForMap(MapSizes mapSize)
+    {
+        return mapSize switch
+        {
+            MapSizes.Large => (6, 5),
+            MapSizes.Medium => (3, 4),
+            _ => (0, 2), // small
+        };
     }
 
     public Room ReturnCurrentRoom(PlayerLocation playerLocation)
