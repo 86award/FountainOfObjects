@@ -1,17 +1,23 @@
 public class Player
 {
-    public int Column { get; private set; }
     public int Row { get; private set; }
+    public int Column { get; private set; }
 
     // perhaps use a switch expression to increment/decrement col/row
-    public void UpdatePlayerLocation(int column, int row)
+    public void UpdatePlayerLocation(int row, int column)
     {
-        Column = column;
         Row = row;
+        Column = column;
     }
 
-    public (int, int) GetPlayerLocation()
+    public PlayerLocation GetPlayerLocation()
     {
-        return (Column, Row);
+        return new PlayerLocation(Row, Column);
     }
+}
+
+public struct PlayerLocation(int row, int column)
+{
+    public int Row { get; } = row;
+    public int Column { get; } = column;
 }
