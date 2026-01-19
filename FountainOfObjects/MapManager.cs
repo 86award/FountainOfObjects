@@ -20,7 +20,8 @@ public class MapManager
         {
             for (int j = 0; j < Rooms.GetLength(0); j++) // rows
             {
-                if (i == 0 && j == 2) Rooms[i, j] = new RoomFountain(); // this is hard-coded atm so needs refactoring
+                if (i == 0 && j == 0) Rooms[i, j] = new RoomEntrance();
+                else if (i == 0 && j == 2) Rooms[i, j] = new RoomFountain(); // this is hard-coded atm so needs refactoring
                 else Rooms[i, j] = new Room(); // will populate L-R then next row
             }
         }
