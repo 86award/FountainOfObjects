@@ -44,28 +44,13 @@ public class GameManager
                 }
                 else
                 {
-                    targetDirection = enteredText switch
-                    {
-                        "move north" => new MoveDirection(-1, 0),
-                        "move south" => new MoveDirection(1, 0),
-                        "move east" => new MoveDirection(0, 1),
-                        "move west" => new MoveDirection(0, -1),
-                        "" => new MoveDirection(0, 0),
-                    };
+                    targetDirection = CreateMoveDirection(enteredText);
                 }
             }
             else
             {
-                targetDirection = enteredText switch
-                {
-                    "move north" => new MoveDirection(-1, 0),
-                    "move south" => new MoveDirection(1, 0),
-                    "move east" => new MoveDirection(0, 1),
-                    "move west" => new MoveDirection(0, -1),
-                    "" => new MoveDirection(0, 0),
-                };
+                targetDirection = CreateMoveDirection(enteredText);
             }
-
 
             if (IsRequestedMoveLegal(player, targetDirection, map))
             {
@@ -87,7 +72,18 @@ public class GameManager
         }
     }
 
-    // should I be using a struct to pass around co-ords instead of tuple
+    private static MoveDirection CreateMoveDirection(string enteredText)
+    {
+        return enteredText switch
+        {
+            "move north" => new MoveDirection(-1, 0),
+            "move south" => new MoveDirection(1, 0),
+            "move east" => new MoveDirection(0, 1),
+            "move west" => new MoveDirection(0, -1),
+            "" => new MoveDirection(0, 0),
+        };
+    }
+
     public bool IsRequestedMoveLegal(Player player, MoveDirection targetPlayerLocation, MapManager map)
     {
         if (targetPlayerLocation.Row == 0 && targetPlayerLocation.Column == 0 && map.ReturnCurrentRoom(player.GetPlayerLocation()).GetType() != typeof(RoomFountain))
@@ -101,8 +97,10 @@ public class GameManager
         player.SetRelativePlayerLocation(targetPlayerLocation.Row, targetPlayerLocation.Column);
         PlayerLocation newLocationToTest = player.GetPlayerLocation();
 
-        if (newLocationToTest.Column < 0 || // I want to get lower and upper bound here intead of magic number
-            newLocationToTest.Row < 0)
+        if (newLocationToTest.Column < 0 ||
+            newLocationToTest.Column > map.ColQty ||
+            newLocationToTest.Row < 0 ||
+            newLocationToTest.Row > map.RowQty)
         {
             WriteColourText("Move invalid; you can't move out of bounds.", ConsoleColor.Red);
             // reset player to original position
