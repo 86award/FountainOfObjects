@@ -1,3 +1,5 @@
+using System.Runtime.InteropServices.Swift;
+
 public class GameManager
 {
     private bool gameActive = true;
@@ -30,46 +32,75 @@ public class GameManager
                 enteredText = Console.ReadLine().ToLower().Trim();
             } while (enteredText == null);
 
-            // this is quite limited an feels like a good place to use a generic so various actions can be handled
-            // in fact, I should make a generic Action that can take a move, enable, search, attack etc.
+            MoveDirection targetDirection = new MoveDirection(0, 0);
 
-            MoveDirection newLocation = enteredText switch
+            if (map.ReturnCurrentRoom(player.GetPlayerLocation()).GetType() == typeof(RoomFountain))
             {
-                "move north" => new MoveDirection(-1, 0),
-                "move south" => new MoveDirection(1, 0),
-                "move east" => new MoveDirection(0, -1),
-                "move west" => new MoveDirection(0, 1),
-                "" => new MoveDirection(0, 0),
-            };
-
-            if (IsRequestedMoveLegal(player, newLocation))
-            {
-                Console.WriteLine("Move successful.");
-                // write out the room's description here
+                if (!isFountainEnabled && enteredText == "enable")
+                {
+                    WriteColourText("The fountain has been activated and water starts pouring over the marble.", ConsoleColor.Blue);
+                    isFountainEnabled = true;
+                    Console.WriteLine();
+                }
+                else
+                {
+                    targetDirection = enteredText switch
+                    {
+                        "move north" => new MoveDirection(-1, 0),
+                        "move south" => new MoveDirection(1, 0),
+                        "move east" => new MoveDirection(0, 1),
+                        "move west" => new MoveDirection(0, -1),
+                        "" => new MoveDirection(0, 0),
+                    };
+                }
             }
+            else
+            {
+                targetDirection = enteredText switch
+                {
+                    "move north" => new MoveDirection(-1, 0),
+                    "move south" => new MoveDirection(1, 0),
+                    "move east" => new MoveDirection(0, 1),
+                    "move west" => new MoveDirection(0, -1),
+                    "" => new MoveDirection(0, 0),
+                };
+            }
+
+
+            if (IsRequestedMoveLegal(player, targetDirection, map))
+            {
+                player.SetRelativePlayerLocation(targetDirection.Row, targetDirection.Column);
+                Console.WriteLine("Move successful.");
+            }
+
             Console.WriteLine("---------------------------------------------------------------------------");
+
+            if (map.ReturnCurrentRoom(player.GetPlayerLocation()) is RoomEntrance) isPlayerAtExit = true;
+            //if (map.ReturnCurrentRoom(player.GetPlayerLocation()).GetType() == typeof(RoomEntrance)) isPlayerAtExit = true;
+            else isPlayerAtExit = false;
+
+            if (isFountainEnabled && isPlayerAtExit)
+            {
+                Console.WriteLine("You win");
+                return;
+            }
         }
     }
 
     // should I be using a struct to pass around co-ords instead of tuple
-    public bool IsRequestedMoveLegal(Player player, MoveDirection newPlayerLocation)
+    public bool IsRequestedMoveLegal(Player player, MoveDirection targetPlayerLocation, MapManager map)
     {
-        // cache player's current location
-        // get player's co-ords
-        PlayerLocation originalLocation = player.GetPlayerLocation(); // this won't work becuase you'd be adding 0,0 i.e. no change
-        // update player location
-        player.SetRelativePlayerLocation(newPlayerLocation.Row, newPlayerLocation.Column);
-        // logic to determine if player can make this move
-        // if it's legal make the move
-        PlayerLocation newLocationToTest = player.GetPlayerLocation();
-        // if not, make no move   
-        // check if they're trying to move out of bounds 
-        if (newPlayerLocation.Row == 0 && newPlayerLocation.Column == 0)
+        if (targetPlayerLocation.Row == 0 && targetPlayerLocation.Column == 0 && map.ReturnCurrentRoom(player.GetPlayerLocation()).GetType() != typeof(RoomFountain))
         {
-            WriteColourText("You need to move in a direction.", ConsoleColor.Red);
+            WriteColourText("You need to pick a direction.", ConsoleColor.Red);
             Console.WriteLine();
             return false;
         }
+        // cache player's original location
+        PlayerLocation originalLocation = player.GetPlayerLocation();
+        player.SetRelativePlayerLocation(targetPlayerLocation.Row, targetPlayerLocation.Column);
+        PlayerLocation newLocationToTest = player.GetPlayerLocation();
+
         if (newLocationToTest.Column < 0 || // I want to get lower and upper bound here intead of magic number
             newLocationToTest.Row < 0)
         {
@@ -79,7 +110,12 @@ public class GameManager
             Console.WriteLine();
             return false;
         }
-        else return true;
+        else
+        {
+            // reset player's location so that move can be applied outside of this method
+            player.SetAbsolutePlayerLocation(originalLocation.Row, originalLocation.Column);
+            return true;
+        }
     }
 
     public void DisplayRoomDescription(Player player, MapManager map)

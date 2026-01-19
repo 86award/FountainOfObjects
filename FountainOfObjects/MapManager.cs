@@ -26,4 +26,9 @@ public class MapManager
             }
         }
     }
+
+    public Room ReturnCurrentRoom(PlayerLocation playerLocation)
+    {
+        return Rooms[playerLocation.Row, playerLocation.Column];
+    }
 }
