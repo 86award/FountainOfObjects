@@ -2,7 +2,7 @@
 {
     private static void Main(string[] args)
     {
-        MapManager map = new MapManager(4, 4);
-        Console.WriteLine(map.Rooms[0, 2].ToString());
+        GameManager gameManager = new GameManager();
+        gameManager.InitialiseGame();
     }
 }

@@ -3,8 +3,20 @@ public class Player
     public int Row { get; private set; }
     public int Column { get; private set; }
 
+    public Player(int startingRow, int startingCol)
+    {
+        Row = startingRow;
+        Column = startingCol;
+    }
+
     // perhaps use a switch expression to increment/decrement col/row
-    public void UpdatePlayerLocation(int row, int column)
+    public void SetRelativePlayerLocation(int row, int column)
+    {
+        Row += row;
+        Column += column;
+    }
+
+    public void SetAbsolutePlayerLocation(int row, int column)
     {
         Row = row;
         Column = column;
