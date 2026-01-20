@@ -8,8 +8,8 @@ public class GameManager
 
     public void InitialiseGame()
     {
+        // CREATE THE MAP
         MapManager? map = null;
-
         bool mapSizeSet = false;
 
         do
@@ -28,7 +28,13 @@ public class GameManager
             }
         } while (mapSizeSet == false);
 
+        // INIT PLAYER
         Player player = new Player(0, 0);
+
+        // WHERE MONSTERS AND PITS ARE PLACED SHOULD BE DATA DRIVEN
+        // ALTHOUGH PITS ARE STATIONARY
+        MonsterMaelstrom maelstrom = new MonsterMaelstrom(3, 2, "Maelstrom");
+        map.Rooms[maelstrom.Row, maelstrom.Column].monster = maelstrom;
 
         Console.WriteLine();
         Console.WriteLine("---------------------------------------------------------------------------");
@@ -39,12 +45,10 @@ public class GameManager
         while (gameActive)
         {
             string? enteredText;
-
             Console.WriteLine();
             DisplayPlayerLocString(player);
             DisplayRoomDescription(player, map);
             map.DisplayAdjacentRoomDescriptions(player.GetPlayerLocation());
-
             do
             {
                 // it would be nice if the room that the player was in determined valid moves - add later
@@ -53,7 +57,6 @@ public class GameManager
                 Console.Write(": ");
                 enteredText = Console.ReadLine().ToLower().Trim();
             } while (enteredText == null);
-
             // CHECK IF PLAYER IS IN FOUNTAIN ROOM 
             MoveDirection targetDirection = new MoveDirection(0, 0);
             if (map.ReturnCurrentRoom(player.GetPlayerLocation()).GetType() == typeof(RoomFountain))
@@ -73,7 +76,6 @@ public class GameManager
             {
                 targetDirection = CreateMoveDirection(enteredText);
             }
-
             if (IsRequestedMoveLegal(player, targetDirection, map))
             {
                 player.SetRelativePlayerLocation(targetDirection.Row, targetDirection.Column);
@@ -92,8 +94,6 @@ public class GameManager
                 WriteColourText($"{map.ReturnCurrentRoom(player.GetPlayerLocation()).RoomDescription}. You died!", ConsoleColor.Red);
                 gameActive = false;
             }
-
-
             // CHECK FOR WIN CONDITION
             if (isFountainEnabled && isPlayerAtExit)
             {

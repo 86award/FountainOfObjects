@@ -61,7 +61,7 @@ public class MapManager
             {
                 if (i == 0 && j == 0) Rooms[i, j] = new RoomEntrance();
 
-                else if (i == 3 && j == 2) Rooms[i, j] = new RoomPit();
+                else if (i == 1 && j == 1) Rooms[i, j] = new RoomPit();
 
                 // Here I can have a nest switch that puts the fountain in a pre-determined cell based on map size
                 else if (i == fountainLocation.row && j == fountainLocation.column) Rooms[i, j] = new RoomFountain(); // this is hard-coded atm so needs refactoring
@@ -92,15 +92,8 @@ public class MapManager
         string _descriptionString = "";
         // data driven array length
         Room[] _adjacentRooms = new Room[Enum.GetValues<CardinalPoints>().Length];
-        // take the player's location
-        // for every cell adjacent, return its type
-        // but you'll need to check it's a valid room
 
         // I could look at using some CONST values to represent compass points instead of using +/-1 i.e. playerLocation.North
-        // _adjacentRooms[0] = ReturnRoomType(Rooms[playerLocation.Row, playerLocation.Column - 1]);
-        // _adjacentRooms[1] = ReturnRoomType(Rooms[playerLocation.Row, playerLocation.Column + 1]);
-        // _adjacentRooms[2] = ReturnRoomType(Rooms[playerLocation.Row + 1, playerLocation.Column]);
-        // _adjacentRooms[3] = ReturnRoomType(Rooms[playerLocation.Row - 1, playerLocation.Column]);
         _adjacentRooms[(int)CardinalPoints.North] = playerLocation.Row > 0 ? ReturnRoomType(Rooms[playerLocation.Row - 1, playerLocation.Column]) : null;
         _adjacentRooms[(int)CardinalPoints.South] = playerLocation.Row < RowQty - 1 ? ReturnRoomType(Rooms[playerLocation.Row + 1, playerLocation.Column]) : null;
         _adjacentRooms[(int)CardinalPoints.East] = playerLocation.Column < ColQty - 1 ? ReturnRoomType(Rooms[playerLocation.Row, playerLocation.Column + 1]) : null;
@@ -111,14 +104,15 @@ public class MapManager
         _adjacentRooms[(int)CardinalPoints.SW] = playerLocation.Row < RowQty - 1 && playerLocation.Column < 0 ? ReturnRoomType(Rooms[playerLocation.Row + 1, playerLocation.Column - 1]) : null;
         _adjacentRooms[(int)CardinalPoints.NW] = playerLocation.Row > 0 && playerLocation.Column > 0 ? ReturnRoomType(Rooms[playerLocation.Row - 1, playerLocation.Column - 1]) : null;
 
-        // for each type, return a text description
-        // concat all descriptions together and return
         // foreach (Room room in _adjacentRooms)
         for (int i = 0; i < _adjacentRooms.Length; i++)
         {
             if (_adjacentRooms[i] != null)
             {
-                if (_adjacentRooms[i].GetType() == typeof(RoomFountain))
+                // is this not the right place for a generic?
+                if (_adjacentRooms[i].GetType() == typeof(RoomFountain) ||
+                    _adjacentRooms[i].GetType() == typeof(RoomEntrance) ||
+                    _adjacentRooms[i].GetType() == typeof(RoomPit))
                 {
                     _descriptionString += i switch
                     {
@@ -131,6 +125,24 @@ public class MapManager
                         6 => $"To the South West {_adjacentRooms[i].RoomSense}",
                         7 => $"To the North West {_adjacentRooms[i].RoomSense}",
                     };
+                }
+                else if (_adjacentRooms[i].monster != null)
+                {
+                    // not good to type check vs. a string
+                    if (_adjacentRooms[i].monster.Name != null)
+                    {
+                        _descriptionString += i switch
+                        {
+                            0 => $"To the North {_adjacentRooms[i].monster.MonsterSenseDescription}",
+                            1 => $"To the South {_adjacentRooms[i].monster.MonsterSenseDescription}",
+                            2 => $"To the East {_adjacentRooms[i].monster.MonsterSenseDescription}",
+                            3 => $"To the West {_adjacentRooms[i].monster.MonsterSenseDescription}",
+                            4 => $"To the North East {_adjacentRooms[i].monster.MonsterSenseDescription}",
+                            5 => $"To the South East {_adjacentRooms[i].monster.MonsterSenseDescription}",
+                            6 => $"To the South West {_adjacentRooms[i].monster.MonsterSenseDescription}",
+                            7 => $"To the North West {_adjacentRooms[i].monster.MonsterSenseDescription}",
+                        };
+                    }
                 }
             }
             // else
