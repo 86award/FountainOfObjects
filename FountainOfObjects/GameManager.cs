@@ -63,7 +63,7 @@ public class GameManager
             {
                 if (!isFountainEnabled && enteredText == "enable")
                 {
-                    WriteColourText("The fountain has been activated and water starts pouring over the marble.", ConsoleColor.Blue);
+                    WriteColourText("You activate the fountain and water starts pouring over the marble. ", ConsoleColor.Blue);
                     isFountainEnabled = true;
                     Console.WriteLine();
                 }
@@ -79,10 +79,8 @@ public class GameManager
             if (IsRequestedMoveLegal(player, targetDirection, map))
             {
                 player.SetRelativePlayerLocation(targetDirection.Row, targetDirection.Column);
-                Console.WriteLine("Move successful.");
+                // Console.WriteLine("Move successful.");
             }
-
-            Console.WriteLine("---------------------------------------------------------------------------");
 
             if (map.ReturnCurrentRoom(player.GetPlayerLocation()) is RoomEntrance) isPlayerAtExit = true;
             //if (map.ReturnCurrentRoom(player.GetPlayerLocation()).GetType() == typeof(RoomEntrance)) isPlayerAtExit = true;
@@ -91,13 +89,29 @@ public class GameManager
             if (map.ReturnCurrentRoom(player.GetPlayerLocation()) is RoomPit)
             {
                 Console.WriteLine();
-                WriteColourText($"{map.ReturnCurrentRoom(player.GetPlayerLocation()).RoomDescription}. You died!", ConsoleColor.Red);
+                WriteColourText($"{map.ReturnCurrentRoom(player.GetPlayerLocation()).RoomDescription} You died!", ConsoleColor.Red);
                 gameActive = false;
             }
+
+            if (map.ReturnCurrentRoom(player.GetPlayerLocation()).monster != null)
+            {
+                Monster _monster = map.ReturnCurrentRoom(player.GetPlayerLocation()).monster;
+                if (_monster.GetType() == typeof(MonsterMaelstrom))
+                {
+                    // move player [-1, +2]
+                    // if a row or column would be <0 or >max, set to 0 or max respectively
+                    // though I think going back to the entrance is cool
+                    WriteColourText("You've been blown back to the entrance by the maelstrom. ", ConsoleColor.Red);
+                    player.SetAbsolutePlayerLocation(0, 0);
+                    Console.WriteLine();
+                }
+            }
+            Console.WriteLine("---------------------------------------------------------------------------");
+
             // CHECK FOR WIN CONDITION
             if (isFountainEnabled && isPlayerAtExit)
             {
-                Console.WriteLine("You win");
+                Console.WriteLine("You win! ");
                 return;
             }
         }
