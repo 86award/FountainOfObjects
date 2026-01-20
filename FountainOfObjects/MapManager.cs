@@ -1,4 +1,5 @@
 // Make this class static because there's only ever going to be one
+
 public enum MapSizes
 {
     Small,
@@ -48,6 +49,8 @@ public class MapManager
             {
                 if (i == 0 && j == 0) Rooms[i, j] = new RoomEntrance();
 
+                else if (i == 3 && j == 2) Rooms[i, j] = new RoomPit();
+
                 // Here I can have a nest switch that puts the fountain in a pre-determined cell based on map size
                 else if (i == fountainLocation.row && j == fountainLocation.column) Rooms[i, j] = new RoomFountain(); // this is hard-coded atm so needs refactoring
                 // not overly happy with how this works
@@ -70,5 +73,63 @@ public class MapManager
     public Room ReturnCurrentRoom(PlayerLocation playerLocation)
     {
         return Rooms[playerLocation.Row, playerLocation.Column];
+    }
+
+    public void DisplayAdjacentRoomDescriptions(PlayerLocation playerLocation)
+    {
+        string _descriptionString = "";
+        Room[] _adjacentRooms = new Room[4];
+        // take the player's location
+        // for every cell adjacent, return its type
+        // but you'll need to check it's a valid room
+
+        // I could look at using some CONST values to represent compass points instead of using +/-1 i.e. playerLocation.North
+        // _adjacentRooms[0] = ReturnRoomType(Rooms[playerLocation.Row, playerLocation.Column - 1]);
+        // _adjacentRooms[1] = ReturnRoomType(Rooms[playerLocation.Row, playerLocation.Column + 1]);
+        // _adjacentRooms[2] = ReturnRoomType(Rooms[playerLocation.Row + 1, playerLocation.Column]);
+        // _adjacentRooms[3] = ReturnRoomType(Rooms[playerLocation.Row - 1, playerLocation.Column]);
+        _adjacentRooms[0] = playerLocation.Row > 0 ? ReturnRoomType(Rooms[playerLocation.Row - 1, playerLocation.Column]) : null;
+        _adjacentRooms[1] = playerLocation.Row < RowQty - 1 ? ReturnRoomType(Rooms[playerLocation.Row + 1, playerLocation.Column]) : null;
+        _adjacentRooms[2] = playerLocation.Column < ColQty - 1 ? ReturnRoomType(Rooms[playerLocation.Row, playerLocation.Column + 1]) : null;
+        _adjacentRooms[3] = playerLocation.Column > 0 ? ReturnRoomType(Rooms[playerLocation.Row, playerLocation.Column - 1]) : null;
+
+        // for each type, return a text description
+        // concat all descriptions together and return
+        // foreach (Room room in _adjacentRooms)
+        for (int i = 0; i < _adjacentRooms.Length; i++)
+        {
+            if (_adjacentRooms[i] != null)
+            {
+                _descriptionString += i switch
+                {
+                    0 => $"To the North {_adjacentRooms[i].RoomSense}",
+                    1 => $"To the South {_adjacentRooms[i].RoomSense}",
+                    2 => $"To the East {_adjacentRooms[i].RoomSense}",
+                    3 => $"To the West {_adjacentRooms[i].RoomSense}",
+                };
+            }
+            else
+            {
+                _descriptionString += i switch
+                {
+                    0 => $"To the North there is no room. ",
+                    1 => $"To the South there is no room. ",
+                    2 => $"To the East there is no room. ",
+                    3 => $"To the West there is no room. ",
+                };
+            }
+        }
+        Console.WriteLine(_descriptionString);
+    }
+
+    // I want to pass in relative cell references and get back the room type
+    public Room ReturnRoomType(Room room)
+    {
+        // if (room.GetType() == typeof(Room)) return room;
+        // else return null; // should I be returning a null - doesn't feel right
+        
+        // Had to get some AI assistance with this. 
+        // what I really wanted was to return the room type and I think the ternary operator above prevents nulls from being passed to this method anyway.
+        return room;
     }
 }

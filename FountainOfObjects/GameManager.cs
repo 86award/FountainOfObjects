@@ -9,9 +9,9 @@ public class GameManager
     public void InitialiseGame()
     {
         MapManager? map = null;
-        
+
         bool mapSizeSet = false;
-        
+
         do
         {
             Console.Write($"Please choose a map size to determine the level of difficulty (small, medium, large): ");
@@ -43,6 +43,7 @@ public class GameManager
             Console.WriteLine();
             DisplayPlayerLocString(player);
             DisplayRoomDescription(player, map);
+            map.DisplayAdjacentRoomDescriptions(player.GetPlayerLocation());
 
             do
             {
@@ -53,8 +54,8 @@ public class GameManager
                 enteredText = Console.ReadLine().ToLower().Trim();
             } while (enteredText == null);
 
+            // CHECK IF PLAYER IS IN FOUNTAIN ROOM 
             MoveDirection targetDirection = new MoveDirection(0, 0);
-
             if (map.ReturnCurrentRoom(player.GetPlayerLocation()).GetType() == typeof(RoomFountain))
             {
                 if (!isFountainEnabled && enteredText == "enable")
@@ -85,6 +86,15 @@ public class GameManager
             //if (map.ReturnCurrentRoom(player.GetPlayerLocation()).GetType() == typeof(RoomEntrance)) isPlayerAtExit = true;
             else isPlayerAtExit = false;
 
+            if (map.ReturnCurrentRoom(player.GetPlayerLocation()) is RoomPit)
+            {
+                Console.WriteLine();
+                WriteColourText($"{map.ReturnCurrentRoom(player.GetPlayerLocation()).RoomDescription}. You died!", ConsoleColor.Red);
+                gameActive = false;
+            }
+
+
+            // CHECK FOR WIN CONDITION
             if (isFountainEnabled && isPlayerAtExit)
             {
                 Console.WriteLine("You win");
