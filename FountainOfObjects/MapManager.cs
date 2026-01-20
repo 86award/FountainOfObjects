@@ -7,6 +7,18 @@ public enum MapSizes
     Large,
 }
 
+public enum CardinalPoints
+{
+    North,
+    South,
+    East,
+    West,
+    NE,
+    SE,
+    SW,
+    NW,
+}
+
 public class MapManager
 {
     public int RowQty { get; private set; }
@@ -78,7 +90,8 @@ public class MapManager
     public void DisplayAdjacentRoomDescriptions(PlayerLocation playerLocation)
     {
         string _descriptionString = "";
-        Room[] _adjacentRooms = new Room[4];
+        // data driven array length
+        Room[] _adjacentRooms = new Room[Enum.GetValues<CardinalPoints>().Length];
         // take the player's location
         // for every cell adjacent, return its type
         // but you'll need to check it's a valid room
@@ -88,10 +101,15 @@ public class MapManager
         // _adjacentRooms[1] = ReturnRoomType(Rooms[playerLocation.Row, playerLocation.Column + 1]);
         // _adjacentRooms[2] = ReturnRoomType(Rooms[playerLocation.Row + 1, playerLocation.Column]);
         // _adjacentRooms[3] = ReturnRoomType(Rooms[playerLocation.Row - 1, playerLocation.Column]);
-        _adjacentRooms[0] = playerLocation.Row > 0 ? ReturnRoomType(Rooms[playerLocation.Row - 1, playerLocation.Column]) : null;
-        _adjacentRooms[1] = playerLocation.Row < RowQty - 1 ? ReturnRoomType(Rooms[playerLocation.Row + 1, playerLocation.Column]) : null;
-        _adjacentRooms[2] = playerLocation.Column < ColQty - 1 ? ReturnRoomType(Rooms[playerLocation.Row, playerLocation.Column + 1]) : null;
-        _adjacentRooms[3] = playerLocation.Column > 0 ? ReturnRoomType(Rooms[playerLocation.Row, playerLocation.Column - 1]) : null;
+        _adjacentRooms[(int)CardinalPoints.North] = playerLocation.Row > 0 ? ReturnRoomType(Rooms[playerLocation.Row - 1, playerLocation.Column]) : null;
+        _adjacentRooms[(int)CardinalPoints.South] = playerLocation.Row < RowQty - 1 ? ReturnRoomType(Rooms[playerLocation.Row + 1, playerLocation.Column]) : null;
+        _adjacentRooms[(int)CardinalPoints.East] = playerLocation.Column < ColQty - 1 ? ReturnRoomType(Rooms[playerLocation.Row, playerLocation.Column + 1]) : null;
+        _adjacentRooms[(int)CardinalPoints.West] = playerLocation.Column > 0 ? ReturnRoomType(Rooms[playerLocation.Row, playerLocation.Column - 1]) : null;
+
+        _adjacentRooms[(int)CardinalPoints.NE] = playerLocation.Row > 0 && playerLocation.Column < ColQty - 1 ? ReturnRoomType(Rooms[playerLocation.Row - 1, playerLocation.Column + 1]) : null;
+        _adjacentRooms[(int)CardinalPoints.SE] = playerLocation.Row < RowQty - 1 && playerLocation.Column < ColQty - 1 ? ReturnRoomType(Rooms[playerLocation.Row + 1, playerLocation.Column + 1]) : null;
+        _adjacentRooms[(int)CardinalPoints.SW] = playerLocation.Row < RowQty - 1 && playerLocation.Column < 0 ? ReturnRoomType(Rooms[playerLocation.Row + 1, playerLocation.Column - 1]) : null;
+        _adjacentRooms[(int)CardinalPoints.NW] = playerLocation.Row > 0 && playerLocation.Column > 0 ? ReturnRoomType(Rooms[playerLocation.Row - 1, playerLocation.Column - 1]) : null;
 
         // for each type, return a text description
         // concat all descriptions together and return
@@ -100,24 +118,32 @@ public class MapManager
         {
             if (_adjacentRooms[i] != null)
             {
-                _descriptionString += i switch
+                if (_adjacentRooms[i].GetType() == typeof(RoomFountain))
                 {
-                    0 => $"To the North {_adjacentRooms[i].RoomSense}",
-                    1 => $"To the South {_adjacentRooms[i].RoomSense}",
-                    2 => $"To the East {_adjacentRooms[i].RoomSense}",
-                    3 => $"To the West {_adjacentRooms[i].RoomSense}",
-                };
+                    _descriptionString += i switch
+                    {
+                        0 => $"To the North {_adjacentRooms[i].RoomSense}",
+                        1 => $"To the South {_adjacentRooms[i].RoomSense}",
+                        2 => $"To the East {_adjacentRooms[i].RoomSense}",
+                        3 => $"To the West {_adjacentRooms[i].RoomSense}",
+                        4 => $"To the North East {_adjacentRooms[i].RoomSense}",
+                        5 => $"To the South East {_adjacentRooms[i].RoomSense}",
+                        6 => $"To the South West {_adjacentRooms[i].RoomSense}",
+                        7 => $"To the North West {_adjacentRooms[i].RoomSense}",
+                    };
+                }
             }
-            else
-            {
-                _descriptionString += i switch
-                {
-                    0 => $"To the North there is no room. ",
-                    1 => $"To the South there is no room. ",
-                    2 => $"To the East there is no room. ",
-                    3 => $"To the West there is no room. ",
-                };
-            }
+            // else
+            // {
+            //     _descriptionString += i switch
+            //     {
+            //         0 => $"To the North there is no room. ",
+            //         1 => $"To the South there is no room. ",
+            //         2 => $"To the East there is no room. ",
+            //         3 => $"To the West there is no room. ",
+            //     };
+            // }
+
         }
         Console.WriteLine(_descriptionString);
     }
@@ -127,7 +153,7 @@ public class MapManager
     {
         // if (room.GetType() == typeof(Room)) return room;
         // else return null; // should I be returning a null - doesn't feel right
-        
+
         // Had to get some AI assistance with this. 
         // what I really wanted was to return the room type and I think the ternary operator above prevents nulls from being passed to this method anyway.
         return room;
