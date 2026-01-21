@@ -1,3 +1,9 @@
+public enum ActionType
+{
+    Move,
+    Shoot,
+    Interact,
+}
 // public class PlayerAction<T>
 // {
 //     // a player action is going to contain a string 
@@ -6,7 +12,7 @@
     
 // }
 
-public struct PlayerLocation(int row, int column)
+public struct PlayerLocation(int row, int column) // REMINDER: doesn't make sense for this to exist here; move to player.
 {
     public int Row { get; } = row;
     public int Column { get; } = column;

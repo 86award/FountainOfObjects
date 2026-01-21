@@ -3,6 +3,8 @@ public class GameManager
     private bool gameActive = true;
     private bool isFountainEnabled;
     private bool isPlayerAtExit;
+    private string? playerInputActionText;
+    private ActionType playerActionType;
 
     public void InitialiseGame()
     {
@@ -17,77 +19,108 @@ public class GameManager
         MonsterMaelstrom maelstrom = new MonsterMaelstrom(3, 2, "Maelstrom"); // REMINDER: need to look for a data driven way to spawn monsters and traps
         if (map != null) map.Rooms[maelstrom.Row, maelstrom.Column].monster = maelstrom;
 
-        // COMMENCE GAME
+        // INTRO GAME
         DisplayIntroText();
 
         // MAIN GAME LOOP
         while (gameActive && map != null)
         {
-            string? playerInputAction;
+            // UPDATE PLAYER STATE
             Room currentPlayerRoom = map.ReturnCurrentRoom(player.GetPlayerLocation());
+            /*if (currentPlayerRoom is RoomPit)
+            {
+                WriteColourText($"{currentPlayerRoom.RoomDescription}You died! \\n", ConsoleColor.Red);
+                gameActive = false;
+                return;
+            }
+            if (currentPlayerRoom.monster != null)
+            {
+                Monster _monster = currentPlayerRoom.monster;
+                if (_monster.GetType() == typeof(MonsterMaelstrom))
+                {
+                    WriteColourText("You've been blown back to the entrance by the maelstrom. ", ConsoleColor.Red);
+                    player.SetAbsolutePlayerLocation(0, 0);
+                }
+            }
+            if (currentPlayerRoom is RoomEntrance) isPlayerAtExit = true;
+            else isPlayerAtExit = false;
 
+            // CHECK FOR WIN CONDITION
+            if (isFountainEnabled && isPlayerAtExit)
+            {
+                WriteColourText("You win! ", ConsoleColor.Blue);
+                return;
+            }*/
+            
             // DISPLAY GAME STATE
             DisplayPlayerLocString(player);
             DisplayRoomDescription(player, map);
             map.DisplayAdjacentRoomDescriptions(player.GetPlayerLocation());
 
             // GET PLAYER INPUT ACTION
-            playerInputAction = GetPlayerInput();
+            playerInputActionText = GetPlayerInput();
+            // I need to pass in a string, parse it and then pass out a specific action OR say it wasn't valid and ask again.
+            if (!IsInputActionTextValid(playerInputActionText))
+            {
+                WriteColourText("Please enter a valid action, in full e.g. 'move south' \n", ConsoleColor.Red);
+                DrawLineBreak();
+                continue;
+            }
+            playerActionType = AssignActionType(playerInputActionText);
+
+            // HANDLE INPUT ACTION
+            switch (playerActionType)
+            {
+                case ActionType.Move:
+                    MoveDirection targetDirection = CreateMoveDirection(playerInputActionText);
+                    if (IsRequestedMoveLegal(player, targetDirection, map))
+                    {
+                        player.SetRelativePlayerLocation(targetDirection.Row, targetDirection.Column);
+                    }
+                    break;
+                case ActionType.Shoot:
+                    break;
+                case ActionType.Interact: // REMINDER: make interact contextual to room
+                    if (currentPlayerRoom.GetType() == typeof(RoomFountain))
+                    {
+                        if (!isFountainEnabled)
+                        {
+                            WriteColourText("You activate the fountain and water starts pouring over the marble. \n", ConsoleColor.Blue);
+                            isFountainEnabled = true;
+                        }
+                        else WriteColourText("The fountain is already active. \n", ConsoleColor.Blue);
+                    }
+                    break;
+            }
             
-            MoveDirection targetDirection = new MoveDirection(0, 0);
-
-            // PLAYER LOCATION CHECKS
-            if (currentPlayerRoom.GetType() == typeof(RoomFountain))
-            {
-                if (!isFountainEnabled && playerInputAction == "enable")
-                {
-                    WriteColourText("You activate the fountain and water starts pouring over the marble. ", ConsoleColor.Blue);
-                    isFountainEnabled = true;
-                    Console.WriteLine();
-                }
-                else
-                {
-                    targetDirection = CreateMoveDirection(playerInputAction);
-                }
-            }
-            else targetDirection = CreateMoveDirection(playerInputAction);
-            if (IsRequestedMoveLegal(player, targetDirection, map))
-            {
-                player.SetRelativePlayerLocation(targetDirection.Row, targetDirection.Column);
-                // Console.WriteLine("Move successful.");
-            }
-            if (currentPlayerRoom is RoomEntrance) isPlayerAtExit = true;
-            //if (map.ReturnCurrentRoom(player.GetPlayerLocation()).GetType() == typeof(RoomEntrance)) isPlayerAtExit = true;
-            else isPlayerAtExit = false;
-
+            // UPDATE PLAYER STATE
+            currentPlayerRoom = map.ReturnCurrentRoom(player.GetPlayerLocation());
             if (currentPlayerRoom is RoomPit)
             {
-                Console.WriteLine();
-                WriteColourText($"{map.ReturnCurrentRoom(player.GetPlayerLocation()).RoomDescription} You died!", ConsoleColor.Red);
+                WriteColourText($"{currentPlayerRoom.RoomDescription}You died! \\n", ConsoleColor.Red);
                 gameActive = false;
+                return;
             }
-
             if (currentPlayerRoom.monster != null)
             {
-                Monster _monster = map.ReturnCurrentRoom(player.GetPlayerLocation()).monster;
+                Monster _monster = currentPlayerRoom.monster;
                 if (_monster.GetType() == typeof(MonsterMaelstrom))
                 {
-                    // move player [-1, +2]
-                    // if a row or column would be <0 or >max, set to 0 or max respectively
-                    // though I think going back to the entrance is cool
                     WriteColourText("You've been blown back to the entrance by the maelstrom. ", ConsoleColor.Red);
                     player.SetAbsolutePlayerLocation(0, 0);
-                    Console.WriteLine();
                 }
             }
-            Console.WriteLine("---------------------------------------------------------------------------");
+            if (currentPlayerRoom is RoomEntrance) isPlayerAtExit = true;
+            else isPlayerAtExit = false;
 
             // CHECK FOR WIN CONDITION
             if (isFountainEnabled && isPlayerAtExit)
             {
-                Console.WriteLine("You win! ");
+                WriteColourText("You win! ", ConsoleColor.Blue);
                 return;
             }
+
+            DrawLineBreak();            
         }
 
         static void DisplayIntroText()
@@ -107,8 +140,8 @@ public class GameManager
             string? enteredText;
             do
             {
-                Console.Write("Please enter a valid action e.g., ");
-                WriteColourText("move north/south/east/west", ConsoleColor.Yellow);
+                Console.Write("Enter a valid action e.g., ");
+                WriteColourText($"move north/south/east/west, interact or attack", ConsoleColor.Yellow);
                 Console.Write(": ");
                 enteredText = Console.ReadLine()?.ToLower().Trim();
             } while (enteredText == null);
@@ -116,6 +149,10 @@ public class GameManager
         }
     }
 
+    public static void DrawLineBreak()
+    {
+        Console.WriteLine("------------------------------------------------------------------------------------\n");
+    }
     public static void WriteColourText(string text, ConsoleColor colour)
     {
         Console.ForegroundColor = colour;
@@ -137,12 +174,13 @@ public class GameManager
     }
     public bool IsRequestedMoveLegal(Player player, MoveDirection targetPlayerLocation, MapManager map)
     {
-        if (targetPlayerLocation.Row == 0 && targetPlayerLocation.Column == 0 && map.ReturnCurrentRoom(player.GetPlayerLocation()).GetType() != typeof(RoomFountain))
-        {
-            WriteColourText("You need to pick a direction.", ConsoleColor.Red);
-            Console.WriteLine();
-            return false;
-        }
+        // This stops the player from entering nothing but no longer needed as I handle input above.
+        // if (targetPlayerLocation.Row == 0 && targetPlayerLocation.Column == 0 && map.ReturnCurrentRoom(player.GetPlayerLocation()).GetType() != typeof(RoomFountain))
+        // {
+        //     WriteColourText("You need to pick a direction.", ConsoleColor.Red);
+        //     Console.WriteLine();
+        //     return false;
+        // }
         // cache player's original location
         PlayerLocation originalLocation = player.GetPlayerLocation();
         player.SetRelativePlayerLocation(targetPlayerLocation.Row, targetPlayerLocation.Column);
@@ -166,7 +204,14 @@ public class GameManager
             return true;
         }
     }
-
+    public bool IsInputActionTextValid(string inputActionText)
+    {
+        if (inputActionText == "move north" || inputActionText == "move south" || inputActionText == "move east" || inputActionText == "move west" ||
+        inputActionText == "shoot north" || inputActionText == "shoot south" || inputActionText == "shoot east" || inputActionText == "shoot west" ||
+        inputActionText == "interact" || inputActionText == "enable")
+            return true;
+        else return false;
+    }
     private static void SetMapSize(ref MapManager? map)
     {
         bool mapSizeSet = false;
@@ -186,7 +231,13 @@ public class GameManager
             }
         } while (mapSizeSet == false);
     }
-    private static MoveDirection CreateMoveDirection(string enteredText)
+    private ActionType AssignActionType(string inputString)
+    {
+        if (inputString.Contains("move")) return ActionType.Move;
+        else if (inputString.Contains("shoot")) return ActionType.Shoot;
+        else return ActionType.Interact;
+    }
+    private MoveDirection CreateMoveDirection(string enteredText)
     {
         return enteredText switch
         {
