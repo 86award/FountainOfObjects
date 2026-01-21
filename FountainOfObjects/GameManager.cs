@@ -17,7 +17,7 @@ public class GameManager
 
         // INIT MONSTERS
         MonsterMaelstrom maelstrom = new MonsterMaelstrom(3, 2, "Maelstrom"); // REMINDER: need to look for a data driven way to spawn monsters and traps
-        if (map != null) map.Rooms[maelstrom.Row, maelstrom.Column].monster = maelstrom;
+        if (map != null) map.Rooms[maelstrom.Row, maelstrom.Column].AssignMonsterToRoom(maelstrom);
 
         // INTRO GAME
         DisplayIntroText();
@@ -32,7 +32,6 @@ public class GameManager
 
             // GET PLAYER INPUT ACTION
             playerInputActionText = GetPlayerInput();
-            // I need to pass in a string, parse it and then pass out a specific action OR say it wasn't valid and ask again.
             if (!IsInputActionTextValid(playerInputActionText))
             {
                 WriteColourText("Please enter a valid action, in full e.g. 'move south' \n", ConsoleColor.Red);
@@ -75,9 +74,9 @@ public class GameManager
                 gameActive = false;
                 return;
             }
-            if (currentPlayerRoom.monster != null)
+            if (currentPlayerRoom.Monster != null)
             {
-                Monster _monster = currentPlayerRoom.monster;
+                Monster _monster = currentPlayerRoom.Monster;
                 if (_monster.GetType() == typeof(MonsterMaelstrom))
                 {
                     WriteColourText("You've been blown back to the entrance by the maelstrom. ", ConsoleColor.Red);
@@ -178,11 +177,11 @@ public class GameManager
             return true;
         }
     }
-    public bool IsInputActionTextValid(string inputActionText)
+    public bool IsInputActionTextValid(string inputActionText) // CAN I OUT THE STRING ITSELF
     {
         if (inputActionText == "move north" || inputActionText == "move south" || inputActionText == "move east" || inputActionText == "move west" ||
         inputActionText == "shoot north" || inputActionText == "shoot south" || inputActionText == "shoot east" || inputActionText == "shoot west" ||
-        inputActionText == "interact" || inputActionText == "enable")
+        inputActionText == "interact" || inputActionText == "enable" || inputActionText == "activate")
             return true;
         else return false;
     }
