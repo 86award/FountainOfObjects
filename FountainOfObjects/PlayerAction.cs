@@ -3,6 +3,7 @@ public enum ActionType
     Move,
     Shoot,
     Interact,
+    Help,
 }
 // public class PlayerAction<T>
 // {

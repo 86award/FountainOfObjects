@@ -39,6 +39,11 @@ public class GameManager
             playerInputActionText = GetPlayerInput();
             if (!IsInputActionTextValid(playerInputActionText))
             {
+                if (playerInputActionText == "quit") 
+                {
+                    continue;
+                }
+
                 WriteColourText("Please enter a valid action, in full e.g. 'verb + direction' \n", ConsoleColor.Red);
                 DrawLineBreak();
                 continue;
@@ -48,6 +53,9 @@ public class GameManager
             // HANDLE INPUT ACTION
             switch (playerActionType)
             {
+                case ActionType.Help:
+                    DisplayHelpText();
+                    break;
                 case ActionType.Move:
                     MoveDirection targetDirection = CreateMoveDirection(playerInputActionText);
                     if (IsRequestedMoveLegal(player, targetDirection, map))
@@ -140,6 +148,19 @@ public class GameManager
             } while (enteredText == null);
             return enteredText;
         }
+        void DisplayHelpText()
+        {
+            Console.WriteLine();
+            Console.WriteLine("+----------------------------------------------------------------------------------+");
+            Console.WriteLine("|                                     HELP                                         |");
+            Console.WriteLine("| When prompted, you need to type one of the following commands:                   |");
+            Console.WriteLine("| * Move North / Move South / Move East / Move West - move one room in direction.  |");
+            Console.WriteLine("| * Interact / Enable / Activate - if room has interactable element, trigger it.   |");
+            Console.WriteLine("| * Shoot North / Shoot South / Shoot East / Shoot West - shoot into room in that  |");
+            Console.WriteLine("|   direction. Consumes one arrow and will kill and monsters in target room.       |");
+            Console.WriteLine("| * Quit - terminates the application.                                             |");
+            Console.WriteLine("+----------------------------------------------------------------------------------+\n");
+        }
     }
 
     public static void DrawLineBreak()
@@ -194,8 +215,14 @@ public class GameManager
     {
         if (inputActionText == "move north" || inputActionText == "move south" || inputActionText == "move east" || inputActionText == "move west" ||
         inputActionText == "shoot north" || inputActionText == "shoot south" || inputActionText == "shoot east" || inputActionText == "shoot west" ||
-        inputActionText == "interact" || inputActionText == "enable" || inputActionText == "activate")
+        inputActionText == "interact" || inputActionText == "enable" || inputActionText == "activate" ||
+        inputActionText == "help")
             return true;
+        else if (inputActionText == "quit")
+        {
+            gameActive = false;
+            return false;
+        }
         else return false;
     }
     private static void SetMapSize(ref MapManager? map)
@@ -221,6 +248,7 @@ public class GameManager
     {
         if (inputString.Contains("move")) return ActionType.Move;
         else if (inputString.Contains("shoot")) return ActionType.Shoot;
+        else if (inputString == "help") return ActionType.Help;
         else return ActionType.Interact;
     }
     private MoveDirection CreateMoveDirection(string enteredText)
