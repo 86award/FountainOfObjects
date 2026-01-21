@@ -17,7 +17,12 @@ public class GameManager
 
         // INIT MONSTERS
         MonsterMaelstrom maelstrom = new MonsterMaelstrom(3, 2, "Maelstrom"); // REMINDER: need to look for a data driven way to spawn monsters and traps
-        if (map != null) map.Rooms[maelstrom.Row, maelstrom.Column].AssignMonsterToRoom(maelstrom);
+        MonsterAmarok amarok = new MonsterAmarok(1, 3, "Amarok");
+        if (map != null)
+        {
+            map.Rooms[maelstrom.Row, maelstrom.Column].AssignMonsterToRoom(maelstrom);
+            map.Rooms[amarok.Row, amarok.Column].AssignMonsterToRoom(amarok);
+        }
 
         // INTRO GAME
         DisplayIntroText();
@@ -89,10 +94,18 @@ public class GameManager
                     WriteColourText("You come to and reaslise you're in a different room. \n", ConsoleColor.Red);
                     ((MonsterMaelstrom)_monster).MaelstromPushback(player, map);
                 }
+                else if (_monster.GetType() == typeof(MonsterAmarok))
+                {
+                    WriteColourText("As you enter, you smell the thing before you see it. \n", ConsoleColor.Red);
+                    WriteColourText("Oozing flesh and a maw full of teeth, it leaps at you. \n", ConsoleColor.Red);
+                    WriteColourText("You died! \n", ConsoleColor.Red);
+                    gameActive = false;
+                    return;
+                }
             }
             if (currentPlayerRoom is RoomEntrance) isPlayerAtExit = true;
             else isPlayerAtExit = false;
-            
+
             // CHECK FOR WIN CONDITION
             if (isFountainEnabled && isPlayerAtExit)
             {
