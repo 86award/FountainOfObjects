@@ -25,33 +25,6 @@ public class GameManager
         // MAIN GAME LOOP
         while (gameActive && map != null)
         {
-            // UPDATE PLAYER STATE
-            Room currentPlayerRoom = map.ReturnCurrentRoom(player.GetPlayerLocation());
-            /*if (currentPlayerRoom is RoomPit)
-            {
-                WriteColourText($"{currentPlayerRoom.RoomDescription}You died! \\n", ConsoleColor.Red);
-                gameActive = false;
-                return;
-            }
-            if (currentPlayerRoom.monster != null)
-            {
-                Monster _monster = currentPlayerRoom.monster;
-                if (_monster.GetType() == typeof(MonsterMaelstrom))
-                {
-                    WriteColourText("You've been blown back to the entrance by the maelstrom. ", ConsoleColor.Red);
-                    player.SetAbsolutePlayerLocation(0, 0);
-                }
-            }
-            if (currentPlayerRoom is RoomEntrance) isPlayerAtExit = true;
-            else isPlayerAtExit = false;
-
-            // CHECK FOR WIN CONDITION
-            if (isFountainEnabled && isPlayerAtExit)
-            {
-                WriteColourText("You win! ", ConsoleColor.Blue);
-                return;
-            }*/
-            
             // DISPLAY GAME STATE
             DisplayPlayerLocString(player);
             DisplayRoomDescription(player, map);
@@ -81,7 +54,8 @@ public class GameManager
                 case ActionType.Shoot:
                     break;
                 case ActionType.Interact: // REMINDER: make interact contextual to room
-                    if (currentPlayerRoom.GetType() == typeof(RoomFountain))
+                    Room playerRoomCheckForInteract = map.ReturnCurrentRoom(player.GetPlayerLocation());
+                    if (playerRoomCheckForInteract.GetType() == typeof(RoomFountain))
                     {
                         if (!isFountainEnabled)
                         {
@@ -94,7 +68,7 @@ public class GameManager
             }
             
             // UPDATE PLAYER STATE
-            currentPlayerRoom = map.ReturnCurrentRoom(player.GetPlayerLocation());
+            Room currentPlayerRoom = map.ReturnCurrentRoom(player.GetPlayerLocation());
             if (currentPlayerRoom is RoomPit)
             {
                 WriteColourText($"{currentPlayerRoom.RoomDescription}You died! \\n", ConsoleColor.Red);
