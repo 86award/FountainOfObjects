@@ -34,7 +34,7 @@ public class GameManager
             playerInputActionText = GetPlayerInput();
             if (!IsInputActionTextValid(playerInputActionText))
             {
-                WriteColourText("Please enter a valid action, in full e.g. 'move south' \n", ConsoleColor.Red);
+                WriteColourText("Please enter a valid action, in full e.g. 'verb + direction' \n", ConsoleColor.Red);
                 DrawLineBreak();
                 continue;
             }
@@ -52,20 +52,25 @@ public class GameManager
                     break;
                 case ActionType.Shoot:
                     break;
-                case ActionType.Interact: // REMINDER: make interact contextual to room
+                case ActionType.Interact:
                     Room playerRoomCheckForInteract = map.ReturnCurrentRoom(player.GetPlayerLocation());
-                    if (playerRoomCheckForInteract.GetType() == typeof(RoomFountain))
+                    if (playerRoomCheckForInteract.IsInteractable == true)
                     {
-                        if (!isFountainEnabled)
+                        if (playerRoomCheckForInteract.GetType() == typeof(RoomFountain))
                         {
-                            WriteColourText("You activate the fountain and water starts pouring over the marble. \n", ConsoleColor.Blue);
-                            isFountainEnabled = true;
+                            if (!isFountainEnabled)
+                            {
+                                WriteColourText("You activate the fountain and water starts pouring over the marble. \n", ConsoleColor.Blue);
+                                isFountainEnabled = true;
+                            }
+                            else WriteColourText("The fountain is already active. \n", ConsoleColor.Blue);
                         }
-                        else WriteColourText("The fountain is already active. \n", ConsoleColor.Blue);
+                        else WriteColourText("You search around and find nothing. \n", ConsoleColor.Blue);
                     }
+                    else WriteColourText("There's nothing to interact with in this room. \n", ConsoleColor.Red);
                     break;
             }
-            
+
             // UPDATE PLAYER STATE
             Room currentPlayerRoom = map.ReturnCurrentRoom(player.GetPlayerLocation());
             if (currentPlayerRoom is RoomPit)
@@ -93,20 +98,20 @@ public class GameManager
                 return;
             }
 
-            DrawLineBreak();            
+            DrawLineBreak();
         }
 
         static void DisplayIntroText()
         {
             Console.WriteLine();
-            Console.WriteLine("+---------------------------------------------------------------------------+");
-            Console.WriteLine("| You enter the Cavern of Objects, a maze of rooms filled with pits, and    |");
-            Console.WriteLine("| other foul dangers, in search of the lost Fountain of Objects.            |");
-            Console.WriteLine("| The only light comes from the entrance; no other light is seen anywhere   |");
-            Console.WriteLine("| in the caverns and you sense magic is the cause of the darkness.          |");
-            Console.WriteLine("| You must navigate the Caverns with your senses alone.                     |");
-            Console.WriteLine("| Find the Fountain of Objects, activate it, and return to the entrance.    |");
-            Console.WriteLine("+---------------------------------------------------------------------------+\n");
+            Console.WriteLine("+----------------------------------------------------------------------------------+");
+            Console.WriteLine("| You enter the Cavern of Objects, a maze of rooms filled with pits, and other     |");
+            Console.WriteLine("| foul dangers, in search of the lost Fountain of Objects.                         |");
+            Console.WriteLine("| The only light comes from the entrance; no other light is seen anywhere in the   |");
+            Console.WriteLine("| caverns and you sense magic is the cause of the darkness.                        |");
+            Console.WriteLine("| You must navigate the Caverns with your senses alone.                            |");
+            Console.WriteLine("| Find the Fountain of Objects, activate it, and return to the entrance.           |");
+            Console.WriteLine("+----------------------------------------------------------------------------------+\n");
         }
         static string GetPlayerInput()
         {
@@ -134,11 +139,11 @@ public class GameManager
     }
     public void DisplayPlayerLocString(Player player)
     {
-        Console.Write($"The player is at [");
+        Console.Write($"Your position is [");
         WriteColourText($"{player.GetPlayerLocation().Row}", ConsoleColor.DarkMagenta);
         Console.Write(", ");
         WriteColourText($"{player.GetPlayerLocation().Column}", ConsoleColor.DarkMagenta);
-        Console.WriteLine("]. ");
+        Console.Write("]. ");
     }
     public void DisplayRoomDescription(Player player, MapManager map)
     {
@@ -147,13 +152,6 @@ public class GameManager
     }
     public bool IsRequestedMoveLegal(Player player, MoveDirection targetPlayerLocation, MapManager map)
     {
-        // This stops the player from entering nothing but no longer needed as I handle input above.
-        // if (targetPlayerLocation.Row == 0 && targetPlayerLocation.Column == 0 && map.ReturnCurrentRoom(player.GetPlayerLocation()).GetType() != typeof(RoomFountain))
-        // {
-        //     WriteColourText("You need to pick a direction.", ConsoleColor.Red);
-        //     Console.WriteLine();
-        //     return false;
-        // }
         // cache player's original location
         PlayerLocation originalLocation = player.GetPlayerLocation();
         player.SetRelativePlayerLocation(targetPlayerLocation.Row, targetPlayerLocation.Column);
@@ -214,10 +212,10 @@ public class GameManager
     {
         return enteredText switch
         {
-            "move north" => new MoveDirection(-1, 0),
-            "move south" => new MoveDirection(1, 0),
-            "move east" => new MoveDirection(0, 1),
-            "move west" => new MoveDirection(0, -1),
+            "move north" => new MoveDirection(-1, 0), 
+            "move south" => new MoveDirection(1, 0), 
+            "move east" => new MoveDirection(0, 1), 
+            "move west" => new MoveDirection(0, -1), 
             "" => new MoveDirection(0, 0),
         };
     }

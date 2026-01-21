@@ -85,21 +85,21 @@ public class MapManager
                         7 => $"To the North West {_adjacentRooms[i].RoomSense}",
                     };
                 }
-                else if (_adjacentRooms[i].monster != null)
+                else if (_adjacentRooms[i].Monster != null)
                 {
                     // not good to type check vs. a string
-                    if (_adjacentRooms[i].monster.Name != null)
+                    if (_adjacentRooms[i].Monster?.Name != null)
                     {
                         _descriptionString += i switch
                         {
-                            0 => $"To the North {_adjacentRooms[i].monster.MonsterSenseDescription}",
-                            1 => $"To the South {_adjacentRooms[i].monster.MonsterSenseDescription}",
-                            2 => $"To the East {_adjacentRooms[i].monster.MonsterSenseDescription}",
-                            3 => $"To the West {_adjacentRooms[i].monster.MonsterSenseDescription}",
-                            4 => $"To the North East {_adjacentRooms[i].monster.MonsterSenseDescription}",
-                            5 => $"To the South East {_adjacentRooms[i].monster.MonsterSenseDescription}",
-                            6 => $"To the South West {_adjacentRooms[i].monster.MonsterSenseDescription}",
-                            7 => $"To the North West {_adjacentRooms[i].monster.MonsterSenseDescription}",
+                            0 => $"To the North {_adjacentRooms[i].Monster?.MonsterSenseDescription}",
+                            1 => $"To the South {_adjacentRooms[i].Monster?.MonsterSenseDescription}",
+                            2 => $"To the East {_adjacentRooms[i].Monster?.MonsterSenseDescription}",
+                            3 => $"To the West {_adjacentRooms[i].Monster?.MonsterSenseDescription}",
+                            4 => $"To the North East {_adjacentRooms[i].Monster?.MonsterSenseDescription}",
+                            5 => $"To the South East {_adjacentRooms[i].Monster?.MonsterSenseDescription}",
+                            6 => $"To the South West {_adjacentRooms[i].Monster?.MonsterSenseDescription}",
+                            7 => $"To the North West {_adjacentRooms[i].Monster?.MonsterSenseDescription}",
                         };
                     }
                 }
@@ -116,7 +116,7 @@ public class MapManager
             // }
 
         }
-        Console.WriteLine(_descriptionString);
+        Console.WriteLine($"\n{_descriptionString}\n");
     }
     // I want to pass in relative cell references and get back the room type
     public Room ReturnCurrentRoom(PlayerLocation playerLocation)
