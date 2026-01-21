@@ -84,13 +84,15 @@ public class GameManager
                 Monster _monster = currentPlayerRoom.Monster;
                 if (_monster.GetType() == typeof(MonsterMaelstrom))
                 {
-                    WriteColourText("You've been blown back to the entrance by the maelstrom. ", ConsoleColor.Red);
-                    player.SetAbsolutePlayerLocation(0, 0);
+                    WriteColourText("You walk into the room and see a swirling maelstrom. \n", ConsoleColor.Red);
+                    WriteColourText("As if sentient, the maelstrom appears to notice your arrival and moves towards you. You black out. \n", ConsoleColor.Red);
+                    WriteColourText("You come to and reaslise you're in a different room. \n", ConsoleColor.Red);
+                    ((MonsterMaelstrom)_monster).MaelstromPushback(player, map);
                 }
             }
             if (currentPlayerRoom is RoomEntrance) isPlayerAtExit = true;
             else isPlayerAtExit = false;
-
+            
             // CHECK FOR WIN CONDITION
             if (isFountainEnabled && isPlayerAtExit)
             {

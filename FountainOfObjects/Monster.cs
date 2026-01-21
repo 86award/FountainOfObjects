@@ -1,6 +1,6 @@
 public class Monster
 {
-    public virtual string? MonsterSenseDescription {get; init; }
+    public virtual string? MonsterSense {get; init; }
     public virtual int Row { get; private set; }
     public virtual int Column { get; private set; }
     public virtual string? Name {get; init; }

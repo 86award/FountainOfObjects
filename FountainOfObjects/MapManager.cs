@@ -60,7 +60,7 @@ public class MapManager
 
         _adjacentRooms[(int)CardinalPoints.NE] = playerLocation.Row > 0 && playerLocation.Column < ColQty - 1 ? ReturnRoomType(Rooms[playerLocation.Row - 1, playerLocation.Column + 1]) : null;
         _adjacentRooms[(int)CardinalPoints.SE] = playerLocation.Row < RowQty - 1 && playerLocation.Column < ColQty - 1 ? ReturnRoomType(Rooms[playerLocation.Row + 1, playerLocation.Column + 1]) : null;
-        _adjacentRooms[(int)CardinalPoints.SW] = playerLocation.Row < RowQty - 1 && playerLocation.Column < 0 ? ReturnRoomType(Rooms[playerLocation.Row + 1, playerLocation.Column - 1]) : null;
+        _adjacentRooms[(int)CardinalPoints.SW] = playerLocation.Row < RowQty - 1 && playerLocation.Column > 0 ? ReturnRoomType(Rooms[playerLocation.Row + 1, playerLocation.Column - 1]) : null;
         _adjacentRooms[(int)CardinalPoints.NW] = playerLocation.Row > 0 && playerLocation.Column > 0 ? ReturnRoomType(Rooms[playerLocation.Row - 1, playerLocation.Column - 1]) : null;
 
         // foreach (Room room in _adjacentRooms)
@@ -92,14 +92,14 @@ public class MapManager
                     {
                         _descriptionString += i switch
                         {
-                            0 => $"To the North {_adjacentRooms[i].Monster?.MonsterSenseDescription}",
-                            1 => $"To the South {_adjacentRooms[i].Monster?.MonsterSenseDescription}",
-                            2 => $"To the East {_adjacentRooms[i].Monster?.MonsterSenseDescription}",
-                            3 => $"To the West {_adjacentRooms[i].Monster?.MonsterSenseDescription}",
-                            4 => $"To the North East {_adjacentRooms[i].Monster?.MonsterSenseDescription}",
-                            5 => $"To the South East {_adjacentRooms[i].Monster?.MonsterSenseDescription}",
-                            6 => $"To the South West {_adjacentRooms[i].Monster?.MonsterSenseDescription}",
-                            7 => $"To the North West {_adjacentRooms[i].Monster?.MonsterSenseDescription}",
+                            0 => $"To the North {_adjacentRooms[i].Monster?.MonsterSense}",
+                            1 => $"To the South {_adjacentRooms[i].Monster?.MonsterSense}",
+                            2 => $"To the East {_adjacentRooms[i].Monster?.MonsterSense}",
+                            3 => $"To the West {_adjacentRooms[i].Monster?.MonsterSense}",
+                            4 => $"To the North East {_adjacentRooms[i].Monster?.MonsterSense}",
+                            5 => $"To the South East {_adjacentRooms[i].Monster?.MonsterSense}",
+                            6 => $"To the South West {_adjacentRooms[i].Monster?.MonsterSense}",
+                            7 => $"To the North West {_adjacentRooms[i].Monster?.MonsterSense}",
                         };
                     }
                 }
@@ -142,7 +142,7 @@ public class MapManager
             for (int j = 0; j < Rooms.GetLength(0); j++) // rows
             {
                 if (i == 0 && j == 0) Rooms[i, j] = new RoomEntrance(); // REMINDER: Entrance location is hard-coded
-                else if (i == 1 && j == 1) Rooms[i, j] = new RoomPit(); // REMINDER: Pit location is hard-coded and only single instance
+                else if (i == 3 && j == 1) Rooms[i, j] = new RoomPit(); // REMINDER: Pit location is hard-coded and only single instance
                 else if (i == fountainLocation.row && j == fountainLocation.column) Rooms[i, j] = new RoomFountain();
                 else Rooms[i, j] = new Room(); // will populate L-R then next row
             }
