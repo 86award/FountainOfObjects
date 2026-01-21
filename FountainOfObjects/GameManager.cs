@@ -160,9 +160,9 @@ public class GameManager
         PlayerLocation newLocationToTest = player.GetPlayerLocation();
 
         if (newLocationToTest.Column < 0 ||
-            newLocationToTest.Column > map.ColQty ||
+            newLocationToTest.Column >= map.ColQty ||
             newLocationToTest.Row < 0 ||
-            newLocationToTest.Row > map.RowQty)
+            newLocationToTest.Row >= map.RowQty)
         {
             WriteColourText("Move invalid; you can't move out of bounds.", ConsoleColor.Red);
             // reset player to original position
@@ -214,11 +214,11 @@ public class GameManager
     {
         return enteredText switch
         {
-            "move north" => new MoveDirection(-1, 0), 
-            "move south" => new MoveDirection(1, 0), 
-            "move east" => new MoveDirection(0, 1), 
-            "move west" => new MoveDirection(0, -1), 
-            "" => new MoveDirection(0, 0),
+            "move north" => new MoveDirection(-1, 0),
+            "move south" => new MoveDirection(1, 0),
+            "move east" => new MoveDirection(0, 1),
+            "move west" => new MoveDirection(0, -1),
+            _ => new MoveDirection(0, 0),
         };
     }
 
