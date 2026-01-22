@@ -14,4 +14,9 @@ public class Room
         if (Monster == null) Monster = monster;
         else Console.WriteLine("ERROR: monster already exists in this room. ");
     }
+
+    public void KillMonsterInRoom()
+    {
+        Monster = null;
+    }
 }

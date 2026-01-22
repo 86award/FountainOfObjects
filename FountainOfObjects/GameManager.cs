@@ -33,17 +33,14 @@ public class GameManager
             // DISPLAY GAME STATE
             DisplayPlayerLocString(player);
             DisplayRoomDescription(player, map);
+            player.Weapon.DisplayAmmoRemaining();
             map.DisplayAdjacentRoomDescriptions(player.GetPlayerLocation());
 
             // GET PLAYER INPUT ACTION
             playerInputActionText = GetPlayerInput();
             if (!IsInputActionTextValid(playerInputActionText))
             {
-                if (playerInputActionText == "quit") 
-                {
-                    continue;
-                }
-
+                if (playerInputActionText == "quit") continue;
                 WriteColourText("Please enter a valid action, in full e.g. 'verb + direction' \n", ConsoleColor.Red);
                 DrawLineBreak();
                 continue;
@@ -64,6 +61,22 @@ public class GameManager
                     }
                     break;
                 case ActionType.Shoot:
+                    ShootDirection shootDirection = player.CreateShootDirection(playerInputActionText);
+                    if (IsRequestedShotLegal(player, shootDirection, map))
+                    {
+                        if (player.Weapon.AmmunitionCount > 0)
+                        {
+                            player.Weapon.AmmunitionCount--;
+                            // report shooting in direction
+                            ReportHitResult(player, shootDirection, map);
+                        }
+                        else
+                        {
+                            WriteColourText("You don't have any ammo left. \n", ConsoleColor.Red);
+                            break;
+                        }
+                    }
+
                     break;
                 case ActionType.Interact:
                     Room playerRoomCheckForInteract = map.ReturnCurrentRoom(player.GetPlayerLocation());
@@ -198,10 +211,9 @@ public class GameManager
             newLocationToTest.Row < 0 ||
             newLocationToTest.Row >= map.RowQty)
         {
-            WriteColourText("Move invalid; you can't move out of bounds.", ConsoleColor.Red);
+            WriteColourText("Move invalid; you can't move out of bounds. \n", ConsoleColor.Red);
             // reset player to original position
             player.SetAbsolutePlayerLocation(originalLocation.Row, originalLocation.Column);
-            Console.WriteLine();
             return false;
         }
         else
@@ -210,6 +222,19 @@ public class GameManager
             player.SetAbsolutePlayerLocation(originalLocation.Row, originalLocation.Column);
             return true;
         }
+    }
+    public bool IsRequestedShotLegal(Player player, ShootDirection targetShootLocation, MapManager map)
+    {
+        PlayerLocation playerLocation = player.GetPlayerLocation();
+        if (playerLocation.Row + targetShootLocation.Row < 0 ||
+            playerLocation.Row + targetShootLocation.Row >= map.RowQty ||
+            playerLocation.Row + targetShootLocation.Column < 0 ||
+            playerLocation.Row + targetShootLocation.Row >= map.ColQty)
+        {
+            WriteColourText("You're trying to shoot out of bounds. \n", ConsoleColor.Red);
+            return false;
+        }
+        else return true;
     }
     public bool IsInputActionTextValid(string inputActionText) // CAN I OUT THE STRING ITSELF
     {
@@ -224,6 +249,26 @@ public class GameManager
             return false;
         }
         else return false;
+    }
+    public void ReportHitResult(Player player, ShootDirection targetShootLocation, MapManager map)
+    {
+        // get the room at the location of the shot relative to the player
+        int absTargetRow = player.Row + targetShootLocation.Row;
+        int absTargetColumn = player.Column + targetShootLocation.Column;
+        // check if there's a monster in the room
+        Monster? targetMonster = map.Rooms[absTargetRow, absTargetColumn].Monster;
+        if (targetMonster != null)
+        {
+            string report = $"You shoot at the {targetMonster.Name}, hearing a piercing cry as it falls to the ground, dead. \n";
+            WriteColourText(report, ConsoleColor.Red);
+            map.Rooms[absTargetRow, absTargetColumn].KillMonsterInRoom();
+        }
+        else
+        {
+            WriteColourText("You shoot into the empty void and hit nothing, losing your arrow. ", ConsoleColor.Red);
+        }
+        // kill monster if applicable
+        // report back result
     }
     private static void SetMapSize(ref MapManager? map)
     {
