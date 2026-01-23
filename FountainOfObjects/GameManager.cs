@@ -26,6 +26,7 @@ public class GameManager
 
         // INTRO GAME
         DisplayIntroText();
+        DateTime gameStartTime = DateTime.Now;
 
         // MAIN GAME LOOP
         while (gameActive && map != null)
@@ -130,7 +131,10 @@ public class GameManager
             // CHECK FOR WIN CONDITION
             if (isFountainEnabled && isPlayerAtExit)
             {
-                WriteColourText("You win! ", ConsoleColor.Blue);
+                WriteColourText("You win! \n", ConsoleColor.Blue);
+                DateTime gameEndTime = DateTime.Now;
+                TimeSpan playingTime = gameEndTime - gameStartTime;
+                Console.WriteLine($"You were playing for {playingTime.TotalSeconds} seconds. ");
                 return;
             }
 
